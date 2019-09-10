@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
-
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CustomerRepository")
@@ -28,18 +28,24 @@ class Customer
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customer:read", "invoice:read"})
+     * @Assert\NotBlank(message="Le prénom est obligatoire !")
+     * @Assert\Length(min=3, minMessage="Le prénom doit faire 3 caractères")
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customer:read", "invoice:read"})
+     * @Assert\NotBlank(message="Le nom de famille est obligatoire !")
+     * @Assert\Length(min=3, minMessage="Le nom de famille doit faire 3 caractères")
      */
     private $lastName;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customer:read", "invoice:read"})
+     * @Assert\NotBlank(message="L'email est obligatoire !")
+     * @Assert\Email(message="L'email doit etre bien formatée")
      */
     private $email;
 
@@ -54,6 +60,61 @@ class Customer
      * @Groups({"customer:read", "invoice:read"})
      */
     private $user;
+
+    /**
+     * @Groups({"customer:read"})
+     *
+     * @return float
+     */
+    public function getInvoicesCount(): float
+    {
+        return count($this->invoices);
+    }
+
+    /**
+     * @Groups({"customer:read"})
+     *
+     * @return float
+     */
+    public function getTotalAmount(): float
+    {
+        $total = 0;
+
+        foreach ($this->invoices as $invoice) {
+            $total += $invoice->getAmount();
+        }
+
+        return $total;
+    }
+
+    /**
+     * @Groups({"customer:read"})
+     *
+     * @return float
+     */
+    public function getPaidAmount(): float
+    {
+        $total = 0;
+
+        foreach ($this->invoices as $invoice) {
+            if ($invoice->getStatus() === "PAID") {
+                $total += $invoice->getAmount();
+            }
+        }
+
+        return $total;
+    }
+
+    /**
+     * @Groups({"customer:read"})
+     *
+     * @return float
+     */
+    public function getUnpaidAmount(): float
+    {
+
+        return $this->getTotalAmount() - $this->getPaidAmount();
+    }
 
     public function __construct()
     {
