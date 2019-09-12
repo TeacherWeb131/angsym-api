@@ -50,7 +50,7 @@ class Customer
     private $email;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="customer")
+     * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="customer", orphanRemoval=true)
      * @Groups({"customer:read"})
      */
     private $invoices;
