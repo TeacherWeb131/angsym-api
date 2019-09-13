@@ -7,13 +7,14 @@ use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @ApiResource(
- * normalizationContext={"groups":{"customer:read"}}
- * )
+ * @ApiResource
+ * @UniqueEntity("email", message="Un utilisateur possède déja un cette adresse mail")
  */
 class User implements UserInterface
 {
@@ -28,6 +29,8 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"customer:read", "invoice:read"})
+     * @Assert\NotBlank(message="L'adresse email est obligatire")
+     * @Assert\Email(message="L'adresse email doit avoir un format valide")
      */
     private $email;
 
@@ -39,12 +42,15 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Assert\NotBlank(message="Le password est obligatoire")
+     * @Assert\Length(min=4, minMessage="Le password doit avoir au moins 4 caractères")
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"customer:read", "invoice:read"})
+     * @Assert\Url(message="L'Url de l'avatar doit être une URL valide")
      */
     private $avatar;
 
